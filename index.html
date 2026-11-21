@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>J.A.R.V.I.S. // STARK INDUSTRIES MARK LXXXV HUD</title>
+  
+  <!-- Favicon Icon (Arc Reactor SVG Data URI) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23020813' stroke='%2300e5ff' stroke-width='3'/><polygon points='50,22 75,65 25,65' fill='%2300e5ff' opacity='0.8'/><circle cx='50' cy='50' r='15' fill='%23fbbf24'/></svg>">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            stark: {
+              bg: '#020813',
+              card: 'rgba(4, 18, 38, 0.75)',
+              border: '#0d325c',
+              cyan: '#00e5ff',
+              cyanGlow: 'rgba(0, 229, 255, 0.2)',
+              gold: '#fbbf24',
+              goldGlow: 'rgba(251, 191, 36, 0.2)',
+              red: '#ef4444',
+              steel: '#1e293b'
+            }
+          },
+          fontFamily: {
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+            sans: ['Inter', 'sans-serif']
+          },
+          boxShadow: {
+            'arc-cyan': '0 0 20px rgba(0, 229, 255, 0.4), 0 0 40px rgba(0, 229, 255, 0.15)',
+            'stark-gold': '0 0 15px rgba(251, 191, 36, 0.4)',
+            'stark-red': '0 0 20px rgba(239, 68, 68, 0.5)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <style>
+    body {
+      background-color: #020813;
+      color: #e2e8f0;
+      font-family: 'Inter', sans-serif;
+      background-image: 
+        radial-gradient(circle at 50% 30%, rgba(0, 229, 255, 0.08) 0%, transparent 70%),
+        linear-gradient(rgba(0, 229, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 229, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 40px 40px, 40px 40px;
+    }
+
+    .font-orbitron {
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    /* Helmet Visor HUD Overlay Frame */
+    .hud-visor-frame {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      border: 2px solid rgba(0, 229, 255, 0.12);
+      box-shadow: inset 0 0 80px rgba(2, 8, 19, 0.85);
+    }
+    .hud-visor-frame::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 40px; height: 40px;
+      border-top: 3px solid #00e5ff; border-left: 3px solid #00e5ff;
+    }
+    .hud-visor-frame::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0; width: 40px; height: 40px;
+      border-top: 3px solid #00e5ff; border-right: 3px solid #00e5ff;
+    }
+    .hud-corner-bl {
+      position: absolute; bottom: 0; left: 0; width: 40px; height: 40px;
+      border-bottom: 3px solid #00e5ff; border-left: 3px solid #00e5ff;
+    }
+    .hud-corner-br {
+      position: absolute; bottom: 0; right: 0; width: 40px; height: 40px;
+      border-bottom: 3px solid #00e5ff; border-right: 3px solid #00e5ff;
+    }
+
+    /* Scanlines effect overlay */
+    .scanline-overlay {
+      background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0),
+        rgba(255,255,255,0) 50%,
+        rgba(0, 0, 0, 0.25) 50%,
+        rgba(0, 0, 0, 0.25)
+      );
+      background-size: 100% 4px;
+      pointer-events: none;
+    }
+
+    /* Stark HUD Panel Angular Clips */
+    .stark-panel {
+      background: rgba(4, 18, 38, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      clip-path: polygon(
+        0 10px, 10px 0, 
+        calc(100% - 10px) 0, 100% 10px, 
+        100% calc(100% - 10px), calc(100% - 10px) 100%, 
+        10px 100%, 0 calc(100% - 10px)
+      );
+      position: relative;
+    }
+
+    .stark-panel-gold {
+      border-color: rgba(251, 191, 36, 0.4);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #020813; }
+    ::-webkit-scrollbar-thumb {
+      background: #0d325c;
+      border: 1px solid #00e5ff;
+      border-radius: 2px;
+    }
+    ::-webkit-scrollbar-thumb:hover { background: #00e5ff; }
+
+    /* Glowing Text */
+    .glow-cyan {
+      text-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
+    }
+    .glow-gold {
+      text-shadow: 0 0 10px rgba(251, 191, 36, 0.6);
+    }
+
+    @keyframes pulse-gold {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .animate-pulse-gold { animation: pulse-gold 1.8s infinite; }
+  </style>
+</head>
+<body class="h-full flex flex-col font-mono overflow-hidden select-none relative">
+
+  <!-- HUD Visor Corner Overlay Frame -->
+  <div class="hud-visor-frame">
+    <div class="hud-corner-bl"></div>
+    <div class="hud-corner-br"></div>
+  </div>
+
+  <!-- CRT Scanline Layer -->
+  <div class="scanline-overlay absolute inset-0 z-50"></div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed top-6 right-6 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+  <!-- MAIN HUD INTERFACE -->
+  <div class="flex flex-col h-full w-full p-2 md:p-5 gap-3 max-w-7xl mx-auto z-10">
+
+    <!-- STARK HUD HEADER BAR -->
+    <header class="stark-panel px-5 py-3 flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-4">
+        <!-- Iron Man / Arc Reactor Head Logo -->
+        <div class="relative w-10 h-10 flex items-center justify-center rounded-full bg-stark-cyanGlow border border-stark-cyan shadow-arc-cyan">
+          <svg class="w-6 h-6 text-stark-cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg font-black tracking-widest text-white font-orbitron glow-cyan">J.A.R.V.I.S.</h1>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-stark-gold/20 text-stark-gold border border-stark-gold/50 font-bold">MARK LXXXV HUD</span>
+          </div>
+          <p class="text-[10px] text-zinc-400 tracking-widest uppercase">STARK INDUSTRIES TACTICAL ASSISTANT // OS v4.8</p>
+        </div>
+      </div>
+
+      <!-- Armor Telemetry Header Indicators -->
+      <div class="hidden lg:flex items-center gap-8 text-[11px]">
+        <div>
+          <span class="text-zinc-500 block text-[9px] font-bold tracking-wider">ARC REACTOR POWER</span>
+          <div class="flex items-center gap-2">
+            <div class="w-24 h-2 bg-stark-steel rounded-full overflow-hidden border border-stark-cyan/40">
+              <div id="reactor-power-bar" class="h-full bg-gradient-to-r from-stark-cyan to-stark-gold w-[100%] transition-all duration-500"></div>
+            </div>
+            <span id="reactor-power-val" class="text-stark-cyan font-bold font-orbitron">100%</span>
+          </div>
+        </div>
+
+        <div class="w-px h-7 bg-stark-border"></div>
+
+        <div>
+          <span class="text-zinc-500 block text-[9px] font-bold tracking-wider">CORE TEMP</span>
+          <span id="core-temp-val" class="text-stark-gold font-bold font-orbitron">37.2 °C</span>
+        </div>
+
+        <div class="w-px h-7 bg-stark-border"></div>
+
+        <div>
+          <span class="text-zinc-500 block text-[9px] font-bold tracking-wider">SUIT SYSTEM</span>
+          <span id="system-status-badge" class="text-emerald-400 font-bold font-orbitron tracking-wider">ONLINE</span>
+        </div>
+      </div>
+
+      <!-- HUD Control Buttons -->
+      <div class="flex items-center gap-2.5">
+        <button id="audio-toggle-btn" title="Звуки HUD" class="px-3.5 py-1.5 rounded text-xs font-bold border border-stark-border bg-stark-bg hover:border-stark-cyan hover:text-stark-cyan transition flex items-center gap-2 text-zinc-300">
+          <i class="fa-solid fa-volume-high text-stark-cyan" id="audio-icon"></i>
+          <span class="hidden sm:inline">SFX</span>
+        </button>
+        <button id="settings-toggle-btn" class="px-4 py-1.5 rounded text-xs font-bold border border-stark-cyan bg-stark-cyanGlow text-stark-cyan hover:bg-stark-cyan hover:text-stark-bg transition flex items-center gap-2 shadow-arc-cyan">
+          <i class="fa-solid fa-sliders"></i>
+          <span>НАСТРОЙКИ</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+      <div class="stark-panel w-full max-w-xl p-6 space-y-5 text-xs text-zinc-200">
+        
+        <div class="flex items-center justify-between border-b border-stark-border pb-3">
+          <div class="flex items-center gap-2 font-orbitron text-stark-cyan font-bold">
+            <i class="fa-solid fa-microchip"></i>
+            <span>КОНФИГУРАЦИЯ СИСТЕМЫ STARK LOGIC</span>
+          </div>
+          <button id="close-settings-btn" class="text-zinc-400 hover:text-stark-cyan text-lg p-1">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <!-- API Key -->
+          <div class="space-y-1.5">
+            <label class="block text-stark-gold font-bold tracking-wider text-[10px] flex justify-between">
+              <span>GEMINI API KEY (REQUIRED)</span>
+              <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-stark-cyan hover:underline lowercase">получить ключ →</a>
+            </label>
+            <div class="relative">
+              <input id="api-key-input" type="password" placeholder="AIzaSy..." 
+                class="w-full bg-stark-bg border border-stark-border rounded px-3 py-2 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-stark-cyan transition font-mono" />
+              <button id="toggle-key-btn" type="button" class="absolute right-3 top-2.5 text-zinc-500 hover:text-stark-cyan">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+            <p class="text-[10px] text-zinc-400">Используется высокоскоростная модель <span class="text-stark-cyan">gemini-3.5-flash-lite</span>.</p>
+          </div>
+
+          <!-- TTS Voice Selection -->
+          <div class="space-y-1.5">
+            <label class="block text-stark-gold font-bold tracking-wider text-[10px]">
+              ГОЛОС ОЗВУЧКИ (TTS WINDOW.SPEECHSYNTHESIS)
+            </label>
+            <div class="flex gap-2">
+              <select id="voice-select" class="flex-1 bg-stark-bg border border-stark-border rounded px-3 py-2 text-zinc-100 focus:outline-none focus:border-stark-cyan font-mono text-xs">
+                <option value="">Поиск голосов...</option>
+              </select>
+              <button id="test-voice-btn" class="px-3 py-2 border border-stark-border bg-stark-bg hover:border-stark-cyan text-stark-cyan rounded transition flex items-center gap-1 shrink-0">
+                <i class="fa-solid fa-play text-[10px]"></i> Тест
+              </button>
+            </div>
+          </div>
+
+          <!-- Auto TTS Switch -->
+          <div class="flex items-center justify-between p-3 bg-stark-bg/80 rounded border border-stark-border">
+            <div>
+              <span class="block font-bold text-white text-xs">АВТОМАТИЧЕСКАЯ ОЗВУЧКА</span>
+              <span class="text-[10px] text-zinc-400">Озвучивать ответы JARVIS сразу при получении</span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="auto-tts-toggle" class="sr-only peer" checked>
+              <div class="w-9 h-5 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-stark-cyan"></div>
+            </label>
+          </div>
+
+          <!-- Clear History Button -->
+          <div class="pt-2 flex justify-between items-center border-t border-stark-border">
+            <button id="clear-history-btn" class="px-3 py-2 rounded border border-rose-900/60 bg-rose-950/30 text-rose-400 hover:bg-rose-900/50 hover:border-rose-500 transition flex items-center gap-1.5">
+              <i class="fa-solid fa-trash-can"></i> ОЧИСТИТЬ ИСТОРИЮ
+            </button>
+            <button id="save-settings-btn" class="px-5 py-2 rounded bg-stark-cyan text-stark-bg font-bold hover:shadow-arc-cyan transition font-orbitron">
+              СОХРАНИТЬ
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- MAIN GRID CONTAINER -->
+    <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3 min-h-0">
+      
+      <!-- LEFT PANEL: TONY STARK ARC REACTOR CORE & TACTICAL TELEMETRY -->
+      <section class="lg:col-span-5 stark-panel flex flex-col items-center justify-between p-4 relative overflow-hidden">
+        
+        <!-- Arc Reactor Sub-header Status -->
+        <div class="w-full flex items-center justify-between text-[10px] text-zinc-400 border-b border-stark-border/60 pb-2">
+          <span class="font-orbitron">CORE MODE: <span id="core-state-label" class="text-stark-cyan font-bold tracking-widest glow-cyan">STANDBY</span></span>
+          <span id="audio-wave-activity" class="text-stark-gold font-bold">ARC CURRENT: STABLE</span>
+        </div>
+
+        <!-- TONY STARK ARC REACTOR CANVAS -->
+        <div class="relative w-full aspect-square max-w-[290px] sm:max-w-[330px] flex items-center justify-center my-auto">
+          <canvas id="arc-reactor-canvas" class="w-full h-full cursor-pointer" title="Нажмите для спин-апа Дросселя Реактора"></canvas>
+          
+          <!-- Central Hologram Overlay Text inside Arc Reactor Core -->
+          <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+            <span id="core-text-main" class="text-sm font-black text-stark-cyan tracking-widest font-orbitron glow-cyan uppercase">J.A.R.V.I.S.</span>
+            <span id="core-text-sub" class="text-[9px] text-stark-gold tracking-widest font-mono uppercase">MARK LXXXV CORE</span>
+          </div>
+        </div>
+
+        <!-- STARK SUIT TELEMETRY DISPLAY -->
+        <div class="w-full grid grid-cols-3 gap-2 text-center text-[10px] border-t border-stark-border/60 pt-3">
+          <div class="bg-stark-bg/90 p-2 rounded border border-stark-border">
+            <span class="text-zinc-500 block text-[8px] font-bold">REPULSORS</span>
+            <span class="text-stark-gold font-bold font-orbitron">READY [100%]</span>
+          </div>
+          <div class="bg-stark-bg/90 p-2 rounded border border-stark-border">
+            <span class="text-zinc-500 block text-[8px] font-bold">AI PERSONALITY</span>
+            <span class="text-stark-cyan font-bold font-orbitron">BRITISH SARCASTIC</span>
+          </div>
+          <div class="bg-stark-bg/90 p-2 rounded border border-stark-border">
+            <span class="text-zinc-500 block text-[8px] font-bold">TARGETING</span>
+            <span class="text-emerald-400 font-bold font-orbitron">LOCKED</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT PANEL: TERMINAL LOG & CHAT FEED -->
+      <section class="lg:col-span-7 stark-panel flex flex-col min-h-0 relative">
+        
+        <!-- Terminal Header -->
+        <div class="px-4 py-2 bg-stark-bg/90 border-b border-stark-border flex items-center justify-between text-[11px]">
+          <div class="flex items-center gap-2 font-orbitron">
+            <i class="fa-solid fa-crosshairs text-stark-cyan"></i>
+            <span class="text-zinc-200 font-bold tracking-wider">HUD COMMUNICATION MATRIX</span>
+          </div>
+          <span id="log-count-badge" class="text-[10px] text-stark-gold font-bold">0 MESSAGES</span>
+        </div>
+
+        <!-- Terminal Chat Messages Container -->
+        <div id="terminal-feed" class="flex-1 overflow-y-auto p-4 space-y-4 font-mono text-xs">
+          
+          <!-- Default Stark Welcome Log -->
+          <div class="p-3 bg-stark-bg/90 border border-stark-cyan/40 rounded text-zinc-300 space-y-1 shadow-arc-cyan">
+            <div class="text-stark-cyan font-bold flex items-center gap-2 font-orbitron">
+              <i class="fa-solid fa-atom text-stark-gold"></i>
+              <span>STARK INDUSTRIES ASSISTANT INITIALIZED</span>
+            </div>
+            <p class="text-zinc-300 leading-relaxed text-[11px]">
+              К вашим услугам, сэр. Дуговой реактор функционирует на полной мощности. 
+              Задайте вопрос или используйте голосовой ввод.
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Interim Live Voice Transcript Display -->
+        <div id="interim-box" class="px-4 py-1.5 bg-stark-gold/10 border-t border-stark-gold/40 text-stark-gold text-[11px] flex items-center gap-2 hidden">
+          <i class="fa-solid fa-microphone-lines animate-pulse-gold text-stark-gold"></i>
+          <span class="font-bold shrink-0 font-orbitron">ПРИЕМ:</span>
+          <span id="interim-text" class="italic truncate text-zinc-200">...</span>
+        </div>
+
+        <!-- INPUT FORM BAR -->
+        <div class="p-3 bg-stark-bg border-t border-stark-border">
+          <form id="command-form" class="flex items-center gap-2">
+            
+            <!-- Voice Input Mic Toggle Button -->
+            <button id="mic-btn" type="button" title="Активировать голосовой ввод"
+              class="w-10 h-10 rounded border border-stark-border bg-stark-bg text-zinc-400 hover:text-stark-cyan hover:border-stark-cyan transition flex items-center justify-center shrink-0 relative">
+              <i class="fa-solid fa-microphone text-sm"></i>
+              <span id="mic-pulse-ring" class="absolute inset-0 rounded border border-stark-gold animate-ping opacity-0"></span>
+            </button>
+
+            <!-- Text Command Input -->
+            <input id="prompt-input" type="text" placeholder="Введите указания для J.A.R.V.I.S...." autocomplete="off"
+              class="flex-1 bg-black/60 border border-stark-border rounded px-4 py-2.5 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-stark-cyan focus:ring-1 focus:ring-stark-cyan transition font-mono" />
+
+            <!-- Send Button -->
+            <button id="send-btn" type="submit" 
+              class="px-5 py-2.5 bg-stark-cyan text-stark-bg font-extrabold rounded hover:shadow-arc-cyan transition flex items-center gap-1.5 text-xs shrink-0 font-orbitron">
+              <span>ОТПРАВИТЬ</span>
+              <i class="fa-solid fa-paper-plane text-[10px]"></i>
+            </button>
+          </form>
+        </div>
+
+      </section>
+
+    </div>
+
+  </div>
+
+  <!-- JAVASCRIPT ENGINE -->
+  <script>
+    /* ==========================================================================
+       1. WEB AUDIO API SYNTHESIZER (Stark HUD Audio Engine)
+       ========================================================================== */
+    class StarkAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playBeep(freq = 800, type = 'sine', duration = 0.08, vol = 0.1) {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          
+          gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch (e) {
+          console.warn('Audio play error:', e);
+        }
+      }
+
+      playUiClick() { 
+        this.playBeep(1400, 'sine', 0.04, 0.06); 
+      }
+
+      playListenStart() { 
+        this.playBeep(700, 'triangle', 0.08, 0.1); 
+        setTimeout(() => this.playBeep(1100, 'sine', 0.1, 0.1), 70);
+      }
+
+      playProcessBeep() { 
+        this.playBeep(1800, 'sine', 0.03, 0.03); 
+      }
+
+      playError() {
+        this.playBeep(250, 'sawtooth', 0.15, 0.15);
+        setTimeout(() => this.playBeep(180, 'sawtooth', 0.2, 0.15), 90);
+      }
+
+      playReactorSpinUp() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(1200, this.ctx.currentTime + 0.3);
+          gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.3);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.3);
+        } catch(e){}
+      }
+    }
+
+    const sfx = new StarkAudioEngine();
+
+    /* ==========================================================================
+       2. TONY STARK ARC REACTOR CANVAS RENDERER
+       ========================================================================== */
+    class StarkArcReactorRenderer {
+      constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+        this.state = 'STANDBY'; // STANDBY, LISTENING, PROCESSING, SPEAKING, ERROR
+        this.rotation = 0;
+        this.pulse = 0;
+        this.particles = [];
+        this.initCanvas();
+        this.createParticles();
+        this.animate();
+      }
+
+      initCanvas() {
+        const size = 330;
+        this.canvas.width = size;
+        this.canvas.height = size;
+        this.cx = size / 2;
+        this.cy = size / 2;
+      }
+
+      createParticles() {
+        this.particles = [];
+        for (let i = 0; i < 40; i++) {
+          this.particles.push({
+            angle: Math.random() * Math.PI * 2,
+            radius: 25 + Math.random() * 85,
+            speed: 0.008 + Math.random() * 0.018,
+            size: 1 + Math.random() * 2.2,
+            alpha: 0.3 + Math.random() * 0.7
+          });
+        }
+      }
+
+      setState(newState) {
+        this.state = newState;
+        const statusBadge = document.getElementById('system-status-badge');
+        const coreLabel = document.getElementById('core-state-label');
+        const mainText = document.getElementById('core-text-main');
+        const subText = document.getElementById('core-text-sub');
+
+        if (coreLabel) coreLabel.textContent = newState;
+
+        switch (newState) {
+          case 'LISTENING':
+            mainText.textContent = 'LISTENING';
+            subText.textContent = 'AUDIO SENSORS ON';
+            if (statusBadge) { statusBadge.textContent = 'AUDIO INPUT'; statusBadge.className = 'text-stark-gold font-bold font-orbitron'; }
+            break;
+          case 'PROCESSING':
+            mainText.textContent = 'THINKING';
+            subText.textContent = 'COMPUTING RESPONSE';
+            if (statusBadge) { statusBadge.textContent = 'PROCESSING'; statusBadge.className = 'text-stark-cyan font-bold font-orbitron'; }
+            break;
+          case 'SPEAKING':
+            mainText.textContent = 'SPEAKING';
+            subText.textContent = 'TTS AUDIO STREAM';
+            if (statusBadge) { statusBadge.textContent = 'TRANSMITTING'; statusBadge.className = 'text-stark-cyan font-bold font-orbitron'; }
+            break;
+          case 'ERROR':
+            mainText.textContent = 'WARNING';
+            subText.textContent = 'SYSTEM OVERLOAD';
+            if (statusBadge) { statusBadge.textContent = 'ERROR DETECTED'; statusBadge.className = 'text-rose-500 font-bold font-orbitron'; }
+            break;
+          default: // STANDBY / ONLINE
+            mainText.textContent = 'J.A.R.V.I.S.';
+            subText.textContent = 'MARK LXXXV CORE';
+            if (statusBadge) { statusBadge.textContent = 'ONLINE'; statusBadge.className = 'text-emerald-400 font-bold font-orbitron'; }
+            break;
+        }
+      }
+
+      getThemeColors() {
+        switch (this.state) {
+          case 'LISTENING': return { core: '#fbbf24', glow: 'rgba(251, 191, 36, 0.35)', secondary: '#00e5ff' };
+          case 'PROCESSING': return { core: '#00e5ff', glow: 'rgba(0, 229, 255, 0.45)', secondary: '#fbbf24' };
+          case 'SPEAKING': return { core: '#00e5ff', glow: 'rgba(0, 229, 255, 0.4)', secondary: '#38bdf8' };
+          case 'ERROR': return { core: '#ef4444', glow: 'rgba(239, 68, 68, 0.5)', secondary: '#ff0055' };
+          default: return { core: '#00e5ff', glow: 'rgba(0, 229, 255, 0.25)', secondary: '#fbbf24' };
+        }
+      }
+
+      animate() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        const colors = this.getThemeColors();
+        const spinSpeed = (this.state === 'PROCESSING' ? 0.05 : 0.012);
+        this.rotation += spinSpeed;
+        this.pulse += 0.04;
+
+        const pulseExpand = Math.sin(this.pulse) * (this.state === 'SPEAKING' ? 7 : 3);
+
+        // 1. Outer Metallic Alloy Rim with Degree Ticks
+        this.ctx.save();
+        this.ctx.translate(this.cx, this.cy);
+        
+        this.ctx.strokeStyle = 'rgba(13, 50, 92, 0.8)';
+        this.ctx.lineWidth = 4;
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, 125, 0, Math.PI * 2);
+        this.ctx.stroke();
+
+        // 2. Rotating Segmented Outer Ring
+        this.ctx.rotate(this.rotation);
+        this.ctx.strokeStyle = colors.core;
+        this.ctx.lineWidth = 2;
+        this.ctx.setLineDash([16, 8, 4, 8]);
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, 115 + pulseExpand, 0, Math.PI * 2);
+        this.ctx.stroke();
+
+        // 3. Copper Wire Coils around Palladium Ring (10 Segments)
+        const numCoils = 10;
+        for (let i = 0; i < numCoils; i++) {
+          const angle = (i * Math.PI * 2) / numCoils;
+          this.ctx.save();
+          this.ctx.rotate(angle);
+          
+          // Copper Coil block
+          this.ctx.fillStyle = '#b45309'; // Copper/Bronze tone
+          this.ctx.fillRect(82, -8, 16, 16);
+          this.ctx.strokeStyle = colors.secondary;
+          this.ctx.lineWidth = 1;
+          this.ctx.strokeRect(82, -8, 16, 16);
+
+          // Glow accent line on coils
+          this.ctx.fillStyle = colors.core;
+          this.ctx.fillRect(88, -4, 4, 8);
+
+          this.ctx.restore();
+        }
+
+        // 4. Inner Counter-Rotating Ring
+        this.ctx.rotate(-this.rotation * 2.2);
+        this.ctx.strokeStyle = colors.glow;
+        this.ctx.lineWidth = 3;
+        this.ctx.setLineDash([25, 12]);
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, 75, 0, Math.PI * 2);
+        this.ctx.stroke();
+
+        // 5. Central Triangular Vibranium Core Element
+        this.ctx.rotate(this.rotation * 0.5);
+        this.ctx.strokeStyle = colors.core;
+        this.ctx.lineWidth = 2.5;
+        this.ctx.setLineDash([]);
+        this.ctx.beginPath();
+        const triSize = 42 + pulseExpand;
+        for (let i = 0; i < 3; i++) {
+          const a = (i * Math.PI * 2) / 3 - Math.PI / 2;
+          const tx = Math.cos(a) * triSize;
+          const ty = Math.sin(a) * triSize;
+          if (i === 0) this.ctx.moveTo(tx, ty);
+          else this.ctx.lineTo(tx, ty);
+        }
+        this.ctx.closePath();
+        this.ctx.stroke();
+
+        this.ctx.restore();
+
+        // 6. Central Arc Energy Radial Glow
+        const gradient = this.ctx.createRadialGradient(this.cx, this.cy, 5, this.cx, this.cy, 65 + pulseExpand);
+        gradient.addColorStop(0, colors.core);
+        gradient.addColorStop(0.5, colors.glow);
+        gradient.addColorStop(1, 'transparent');
+
+        this.ctx.fillStyle = gradient;
+        this.ctx.beginPath();
+        this.ctx.arc(this.cx, this.cy, 65 + pulseExpand, 0, Math.PI * 2);
+        this.ctx.fill();
+
+        // 7. Orbiting Energy Plasma Particles
+        this.particles.forEach(p => {
+          p.angle += p.speed * (this.state === 'PROCESSING' ? 2.5 : 1);
+          const x = this.cx + Math.cos(p.angle) * p.radius;
+          const y = this.cy + Math.sin(p.angle) * p.radius;
+
+          this.ctx.fillStyle = colors.core;
+          this.ctx.globalAlpha = p.alpha;
+          this.ctx.beginPath();
+          this.ctx.arc(x, y, p.size, 0, Math.PI * 2);
+          this.ctx.fill();
+        });
+        this.ctx.globalAlpha = 1.0;
+
+        requestAnimationFrame(() => this.animate());
+      }
+    }
+
+    /* ==========================================================================
+       3. GLOBAL STATE & LOCAL STORAGE
+       ========================================================================== */
+    const STATE = {
+      apiKey: localStorage.getItem('jarvis_api_key') || '',
+      selectedVoiceURI: localStorage.getItem('jarvis_tts_voice') || '',
+      autoTTS: localStorage.getItem('jarvis_auto_tts') !== 'false',
+      history: JSON.parse(localStorage.getItem('jarvis_chat_history') || '[]'),
+      isListening: false,
+      isProcessing: false,
+      isSpeaking: false
+    };
+
+    const SYSTEM_INSTRUCTION = `ты JARVIS (Джарвис), высокотехнологичный ИИ-ассистент Тони Старка из фильмов Marvel («Железный человек»). Отвечай строго на русском языке, лаконично (максимум 2 предложения и не более 30 слов), с легким утонченным британским сарказмом и обязательным обращением «сэр». Никакого Markdown, списков или спецсимволов.`;
+
+    const SAFETY_SETTINGS = [
+      { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+      { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+      { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+      { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" }
+    ];
+
+    /* ==========================================================================
+       4. SPEECH SYNTHESIS (TTS)
+       ========================================================================== */
+    const synth = window.speechSynthesis;
+    let availableVoices = [];
+
+    function populateVoices() {
+      if (!synth) return;
+      availableVoices = synth.getVoices();
+      const voiceSelect = document.getElementById('voice-select');
+      if (!voiceSelect) return;
+
+      voiceSelect.innerHTML = '';
+      const ruVoices = availableVoices.filter(v => v.lang.includes('ru') || v.lang.includes('RU'));
+      const otherVoices = availableVoices.filter(v => !v.lang.includes('ru') && !v.lang.includes('RU'));
+
+      const listToRender = ruVoices.length > 0 ? [...ruVoices, ...otherVoices] : availableVoices;
+
+      if (listToRender.length === 0) {
+        voiceSelect.innerHTML = '<option value="">Синтезатор речи недоступен</option>';
+        return;
+      }
+
+      listToRender.forEach(voice => {
+        const option = document.createElement('option');
+        option.value = voice.voiceURI;
+        const isRu = voice.lang.includes('ru') ? ' [RU]' : '';
+        option.textContent = `${voice.name} (${voice.lang})${isRu}`;
+        if (voice.voiceURI === STATE.selectedVoiceURI) {
+          option.selected = true;
+        }
+        voiceSelect.appendChild(option);
+      });
+
+      if (!STATE.selectedVoiceURI && ruVoices.length > 0) {
+        STATE.selectedVoiceURI = ruVoices[0].voiceURI;
+        localStorage.setItem('jarvis_tts_voice', STATE.selectedVoiceURI);
+      }
+    }
+
+    if (synth) {
+      populateVoices();
+      if (synth.onvoiceschanged !== undefined) {
+        synth.onvoiceschanged = populateVoices;
+      }
+    }
+
+    function speakText(text) {
+      if (!synth) return;
+      synth.cancel();
+
+      const cleanText = text.replace(/[*_#`~]/g, '');
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.lang = 'ru-RU';
+      utterance.rate = 1.0;
+      utterance.pitch = 0.95;
+
+      if (STATE.selectedVoiceURI) {
+        const voiceObj = availableVoices.find(v => v.voiceURI === STATE.selectedVoiceURI);
+        if (voiceObj) utterance.voice = voiceObj;
+      }
+
+      utterance.onstart = () => {
+        STATE.isSpeaking = true;
+        coreRenderer.setState('SPEAKING');
+      };
+
+      utterance.onend = () => {
+        STATE.isSpeaking = false;
+        if (!STATE.isProcessing && !STATE.isListening) {
+          coreRenderer.setState('STANDBY');
+        }
+      };
+
+      utterance.onerror = () => {
+        STATE.isSpeaking = false;
+        coreRenderer.setState('STANDBY');
+      };
+
+      synth.speak(utterance);
+    }
+
+    /* ==========================================================================
+       5. SPEECH RECOGNITION (WEB SPEECH API)
+       ========================================================================== */
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'ru-RU';
+
+      const micBtn = document.getElementById('mic-btn');
+      const micPulse = document.getElementById('mic-pulse-ring');
+      const interimBox = document.getElementById('interim-box');
+      const interimText = document.getElementById('interim-text');
+
+      recognition.onstart = () => {
+        STATE.isListening = true;
+        sfx.playListenStart();
+        coreRenderer.setState('LISTENING');
+        micBtn.classList.add('border-stark-gold', 'text-stark-gold');
+        micPulse.classList.remove('opacity-0');
+        interimBox.classList.remove('hidden');
+        interimText.textContent = 'Прием аудиосигнала...';
+      };
+
+      recognition.onresult = (e) => {
+        let transcript = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          transcript += e.results[i][0].transcript;
+        }
+        interimText.textContent = transcript;
+
+        if (e.results[0].isFinal) {
+          document.getElementById('prompt-input').value = transcript;
+          submitCommand(transcript);
+        }
+      };
+
+      recognition.onerror = (e) => {
+        stopListening();
+        showToast(`Ошибка распознавания: ${e.error}`, 'error');
+        sfx.playError();
+      };
+
+      recognition.onend = () => {
+        stopListening();
+      };
+    }
+
+    function startListening() {
+      if (!recognition) {
+        showToast('Ваш браузер не поддерживает Web Speech API', 'error');
+        return;
+      }
+      if (STATE.isListening) {
+        recognition.stop();
+        return;
+      }
+      try {
+        recognition.start();
+      } catch (err) {
+        console.error('Recog start error:', err);
+      }
+    }
+
+    function stopListening() {
+      STATE.isListening = false;
+      const micBtn = document.getElementById('mic-btn');
+      const micPulse = document.getElementById('mic-pulse-ring');
+      const interimBox = document.getElementById('interim-box');
+
+      if (micBtn) micBtn.classList.remove('border-stark-gold', 'text-stark-gold');
+      if (micPulse) micPulse.classList.add('opacity-0');
+      if (interimBox) interimBox.classList.add('hidden');
+
+      if (!STATE.isProcessing && !STATE.isSpeaking) {
+        coreRenderer.setState('STANDBY');
+      }
+    }
+
+    /* ==========================================================================
+       6. GEMINI API COMMUNICATION ENGINE
+       ========================================================================== */
+    async function submitCommand(textQuery) {
+      const query = textQuery || document.getElementById('prompt-input').value.trim();
+      if (!query || STATE.isProcessing) return;
+
+      if (!STATE.apiKey) {
+        showToast('Введите Gemini API Key в настройках!', 'error');
+        sfx.playError();
+        document.getElementById('settings-modal').classList.remove('hidden');
+        return;
+      }
+
+      sfx.playUiClick();
+      document.getElementById('prompt-input').value = '';
+
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      STATE.history.push({
+        role: 'user',
+        parts: [{ text: query }],
+        timestamp: timeStr
+      });
+      appendMessageDOM('user', query, timeStr);
+      saveChatHistory();
+
+      STATE.isProcessing = true;
+      coreRenderer.setState('PROCESSING');
+
+      const blipInterval = setInterval(() => {
+        if (STATE.isProcessing) sfx.playProcessBeep();
+      }, 500);
+
+      try {
+        const responseText = await fetchGeminiResponse();
+
+        clearInterval(blipInterval);
+
+        const botTimeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        STATE.history.push({
+          role: 'model',
+          parts: [{ text: responseText }],
+          timestamp: botTimeStr
+        });
+        saveChatHistory();
+
+        appendMessageDOM('model', responseText, botTimeStr);
+
+        STATE.isProcessing = false;
+
+        if (STATE.autoTTS) {
+          speakText(responseText);
+        } else {
+          coreRenderer.setState('STANDBY');
+        }
+
+      } catch (err) {
+        clearInterval(blipInterval);
+        STATE.isProcessing = false;
+        coreRenderer.setState('ERROR');
+        sfx.playError();
+        showToast(`Ошибка API: ${err.message}`, 'error');
+        appendMessageDOM('error', `СБОЙ СИСТЕМЫ: ${err.message}`, timeStr);
+      }
+    }
+
+    async function fetchGeminiResponse() {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${encodeURIComponent(STATE.apiKey)}`;
+
+      const contentsPayload = STATE.history
+        .filter(item => item.role === 'user' || item.role === 'model')
+        .map(item => ({
+          role: item.role,
+          parts: item.parts
+        }));
+
+      const payload = {
+        contents: contentsPayload,
+        systemInstruction: {
+          parts: [{ text: SYSTEM_INSTRUCTION }]
+        },
+        safetySettings: SAFETY_SETTINGS,
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 120
+        }
+      };
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error?.message || `HTTP ${res.status}`);
+      }
+
+      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!reply) {
+        throw new Error('Ответ пуст или заблокирован фильтрами');
+      }
+
+      return reply.trim();
+    }
+
+    /* ==========================================================================
+       7. UI DOM RENDERING
+       ========================================================================== */
+    function appendMessageDOM(role, text, timestamp) {
+      const feed = document.getElementById('terminal-feed');
+      const badge = document.getElementById('log-count-badge');
+      const msgDiv = document.createElement('div');
+
+      if (role === 'user') {
+        msgDiv.className = 'p-3 bg-stark-bg/90 border border-stark-border rounded space-y-1';
+        msgDiv.innerHTML = `
+          <div class="flex items-center justify-between text-[10px] text-zinc-400 font-orbitron">
+            <span class="text-stark-gold font-bold flex items-center gap-1">
+              <i class="fa-solid fa-user-shield"></i> ТОНИ СТАРК (СЭР)
+            </span>
+            <span>${timestamp}</span>
+          </div>
+          <p class="text-zinc-200 leading-relaxed">${escapeHtml(text)}</p>
+        `;
+      } else if (role === 'model') {
+        msgDiv.className = 'p-3 bg-stark-bg/90 border border-stark-cyan/40 rounded space-y-1 shadow-arc-cyan';
+        msgDiv.innerHTML = `
+          <div class="flex items-center justify-between text-[10px] text-zinc-400 font-orbitron">
+            <span class="text-stark-cyan font-bold flex items-center gap-1">
+              <i class="fa-solid fa-atom text-stark-gold"></i> J.A.R.V.I.S.
+            </span>
+            <div class="flex items-center gap-2">
+              <button onclick="speakText('${escapeHtml(text).replace(/'/g, "\\'")}')" 
+                class="hover:text-stark-cyan transition text-zinc-400" title="Озвучить повторно">
+                <i class="fa-solid fa-volume-high"></i>
+              </button>
+              <span>${timestamp}</span>
+            </div>
+          </div>
+          <p class="text-zinc-100 leading-relaxed font-semibold">${escapeHtml(text)}</p>
+        `;
+      } else {
+        msgDiv.className = 'p-3 bg-rose-950/40 border border-rose-500/50 rounded space-y-1 text-rose-300';
+        msgDiv.innerHTML = `
+          <div class="flex items-center justify-between text-[10px] text-rose-400 font-bold font-orbitron">
+            <span><i class="fa-solid fa-triangle-exclamation"></i> CRITICAL WARNING</span>
+            <span>${timestamp}</span>
+          </div>
+          <p class="text-xs font-mono">${escapeHtml(text)}</p>
+        `;
+      }
+
+      feed.appendChild(msgDiv);
+      feed.scrollTop = feed.scrollHeight;
+
+      if (badge) {
+        badge.textContent = `${STATE.history.length} MESSAGES`;
+      }
+    }
+
+    function renderSavedHistory() {
+      STATE.history.forEach(msg => {
+        appendMessageDOM(msg.role, msg.parts[0].text, msg.timestamp || '--:--');
+      });
+    }
+
+    function saveChatHistory() {
+      localStorage.setItem('jarvis_chat_history', JSON.stringify(STATE.history));
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      
+      const borderColor = type === 'error' ? 'border-rose-500 bg-rose-950/90 text-rose-200' : 'border-stark-cyan bg-stark-bg/90 text-stark-cyan';
+      const icon = type === 'error' ? 'fa-circle-xmark text-rose-400' : 'fa-circle-info text-stark-cyan';
+
+      toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-2.5 rounded border ${borderColor} backdrop-blur-md shadow-xl text-xs font-mono transition duration-300 transform translate-y-2 opacity-0`;
+      toast.innerHTML = `
+        <i class="fa-solid ${icon} text-sm"></i>
+        <span class="flex-1">${escapeHtml(message)}</span>
+      `;
+
+      container.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.remove('translate-y-2', 'opacity-0'));
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    /* ==========================================================================
+       8. INIT & EVENT HANDLERS
+       ========================================================================== */
+    let coreRenderer = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      coreRenderer = new StarkArcReactorRenderer('arc-reactor-canvas');
+
+      const apiKeyInput = document.getElementById('api-key-input');
+      const autoTtsToggle = document.getElementById('auto-tts-toggle');
+      
+      apiKeyInput.value = STATE.apiKey;
+      autoTtsToggle.checked = STATE.autoTTS;
+
+      renderSavedHistory();
+
+      // Arc Reactor Click Sound & Spin
+      document.getElementById('arc-reactor-canvas').addEventListener('click', () => {
+        sfx.playReactorSpinUp();
+        if (!STATE.isProcessing && !STATE.isListening && !STATE.isSpeaking) {
+          speakText('Дуговой реактор работает на полную мощность, сэр. Все системы под контролем.');
+        }
+      });
+
+      // Submit Form
+      document.getElementById('command-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        submitCommand();
+      });
+
+      // Mic Button Click
+      document.getElementById('mic-btn').addEventListener('click', startListening);
+
+      // Settings Modal Toggles
+      document.getElementById('settings-toggle-btn').addEventListener('click', () => {
+        sfx.playUiClick();
+        document.getElementById('settings-modal').classList.remove('hidden');
+      });
+
+      document.getElementById('close-settings-btn').addEventListener('click', () => {
+        sfx.playUiClick();
+        document.getElementById('settings-modal').classList.add('hidden');
+      });
+
+      document.getElementById('toggle-key-btn').addEventListener('click', () => {
+        const type = apiKeyInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        apiKeyInput.setAttribute('type', type);
+      });
+
+      document.getElementById('save-settings-btn').addEventListener('click', () => {
+        STATE.apiKey = apiKeyInput.value.trim();
+        STATE.autoTTS = autoTtsToggle.checked;
+        STATE.selectedVoiceURI = document.getElementById('voice-select').value;
+
+        localStorage.setItem('jarvis_api_key', STATE.apiKey);
+        localStorage.setItem('jarvis_auto_tts', STATE.autoTTS.toString());
+        localStorage.setItem('jarvis_tts_voice', STATE.selectedVoiceURI);
+
+        sfx.playUiClick();
+        showToast('Настройки сохранены', 'info');
+        document.getElementById('settings-modal').classList.add('hidden');
+      });
+
+      document.getElementById('test-voice-btn').addEventListener('click', () => {
+        STATE.selectedVoiceURI = document.getElementById('voice-select').value;
+        speakText('Тестирование голосового модуля JARVIS. Голос настроен оптимально, сэр.');
+      });
+
+      document.getElementById('clear-history-btn').addEventListener('click', () => {
+        STATE.history = [];
+        localStorage.removeItem('jarvis_chat_history');
+        const feed = document.getElementById('terminal-feed');
+        feed.innerHTML = `
+          <div class="p-3 bg-stark-bg/90 border border-stark-cyan/40 rounded text-zinc-300 space-y-1 shadow-arc-cyan">
+            <div class="text-stark-cyan font-bold flex items-center gap-2 font-orbitron">
+              <i class="fa-solid fa-atom text-stark-gold"></i>
+              <span>STARK INDUSTRIES ASSISTANT INITIALIZED</span>
+            </div>
+            <p class="text-zinc-300 leading-relaxed text-[11px]">
+              История очищена, сэр. Логи переписки обнулены.
+            </p>
+          </div>
+        `;
+        document.getElementById('log-count-badge').textContent = '0 MESSAGES';
+        showToast('История очищена', 'info');
+      });
+
+      document.getElementById('audio-toggle-btn').addEventListener('click', () => {
+        sfx.enabled = !sfx.enabled;
+        const icon = document.getElementById('audio-icon');
+        if (sfx.enabled) {
+          icon.className = 'fa-solid fa-volume-high text-stark-cyan';
+          sfx.playUiClick();
+          showToast('Звуки HUD включены', 'info');
+        } else {
+          icon.className = 'fa-solid fa-volume-xmark text-zinc-500';
+          showToast('Звуки HUD отключены', 'info');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+```eod
